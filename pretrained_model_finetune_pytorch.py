@@ -116,7 +116,17 @@ def main(args):
         val_acc = check_accuracy(model, val_loader, dtype)
 
         print("train_Acc" , train_acc)
-        print("val_acc", traival_accn_acc)
+        print("val_acc", val_acc)
+        print("\n")
+
+
+def run_epoch(model, loss_fn, train_loader, optimizer, dtype):
+    """
+    Train the model for one epoch.
+    """
+    # Set the model to training mode
+
+
 
 
 
