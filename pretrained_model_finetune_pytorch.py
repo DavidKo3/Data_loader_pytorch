@@ -31,7 +31,9 @@ from torch.utils.data import DataLoader
 
 import torchvision
 import torchvision.transforms as T
+from torchvision.models.resnet import resnet18
 from torchvision.datasets import ImageFolder
+
 
 
 parser = argparse.ArgumentParser()
@@ -80,7 +82,7 @@ def main(args):
 
     # First load the pretrained ResNet-18 model; this will download the model
     # weights from the web the first time you run it
-    model = torch.vision.models.reset18(pretrained=True)
+    model = resnet18(pretrained=True)
 
 
     # Reinitialize the last layer of the model.
@@ -120,11 +122,31 @@ def main(args):
         print("\n")
 
 
-def run_epoch(model, loss_fn, train_loader, optimizer, dtype):
+def run_epoch(model, loss_fn, loader, optimizer, dtype):
     """
     Train the model for one epoch.
     """
     # Set the model to training mode
+    model.train()
+    for x, y in loader:
+        # The Dataloader produces Torch Tensors, so we need to cast them to the
+        # correct datatype and wrap them in Variables.
+        #
+        # Note that the labels should be a torch.LongTensor on CPU and a
+        # torch.cuda.LongTensor on GPU; to accomplish this we first cast to dtype
+        # (either torch.FloatTensor or torch.cuda.FloatTensor) and then cast to
+        # long; this ensures that y has the correct type in both cases.
+        x_var = Variable(x.type(dtype))
+        y_var = Variable(y.type(dtype).long())
+
+        # Run the model forward to compute scores and loss.
+        scores = model(x_var)
+        loss = loss_fn(scores, y_var)
+
+        # Run the model backwrad and take a step using the optimizer.
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
 
 
